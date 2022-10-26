@@ -56,7 +56,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.readFileAsync = exports.constructPactFile = exports.omitHeaders = exports.writePact = exports.formatAlias = void 0;
+exports.readFileAsync = exports.constructPactFile = exports.sortHeaders = exports.omitHeaders = exports.writePact = exports.formatAlias = void 0;
 var lodash_1 = require("lodash");
 var pjson = require('../package.json');
 var formatAlias = function (alias) {
@@ -95,6 +95,16 @@ var omitHeaders = function (headers, blocklist) {
     return (0, lodash_1.omit)(headers, __spreadArray([], blocklist, true));
 };
 exports.omitHeaders = omitHeaders;
+var sortHeaders = function (headers) {
+    if (!headers) {
+        return headers;
+    }
+    return Object.keys(headers).sort().reduce(function (obj, key) {
+        obj[key] = headers[key];
+        return obj;
+    }, {});
+};
+exports.sortHeaders = sortHeaders;
 var constructInteraction = function (intercept, testTitle, blocklist, matchingRules) {
     var _a, _b, _c;
     var path = new URL(intercept.request.url).pathname;
@@ -106,13 +116,13 @@ var constructInteraction = function (intercept, testTitle, blocklist, matchingRu
         request: {
             method: intercept.request.method,
             path: path,
-            headers: (0, exports.omitHeaders)(intercept.request.headers, blocklist),
+            headers: (0, exports.sortHeaders)((0, exports.omitHeaders)(intercept.request.headers, blocklist)),
             body: intercept.request.body,
             query: query
         },
         response: {
             status: (_a = intercept.response) === null || _a === void 0 ? void 0 : _a.statusCode,
-            headers: (0, exports.omitHeaders)((_b = intercept.response) === null || _b === void 0 ? void 0 : _b.headers, blocklist),
+            headers: (0, exports.sortHeaders)((0, exports.omitHeaders)((_b = intercept.response) === null || _b === void 0 ? void 0 : _b.headers, blocklist)),
             body: (_c = intercept.response) === null || _c === void 0 ? void 0 : _c.body,
             matchingRules: matchingRules,
         }
